@@ -53,7 +53,7 @@ class CommitService @Autowired constructor(
     }
 
     fun getCommit(buildId: String): List<CommitResponse> {
-        val commits = commitDao.getBuildCommit(dslContext, buildId) ?: return listOf()
+        val commits = commitDao.getBuildCommit(dslContext, buildId)?.distinctBy { it.commit } ?: return listOf()
 
         val repoIds = commits.filter { it.repoName.isNullOrBlank() }.map { it.repoId }
         val repoNames = commits.filter { !it.repoName.isNullOrBlank() }.map { it.repoName }
@@ -68,7 +68,7 @@ class CommitService @Autowired constructor(
         )?.map { it.aliasName.toString() to it }?.toMap() ?: mapOf()
 
         return commits.map {
-            val repoUrl = idRepos[it.repoId.toString()]?.url ?: nameRepos[it.repoName]?.url
+            val repoUrl = it.url ?: idRepos[it.repoId.toString()]?.url ?: nameRepos[it.repoName]?.url
             CommitData(
                 type = it.type,
                 pipelineId = it.pipelineId,
