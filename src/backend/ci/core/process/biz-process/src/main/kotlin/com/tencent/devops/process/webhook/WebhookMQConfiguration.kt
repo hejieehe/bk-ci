@@ -30,9 +30,12 @@ package com.tencent.devops.process.webhook
 import com.tencent.devops.common.event.annotation.EventConsumer
 import com.tencent.devops.common.stream.ScsConsumerBuilder
 import com.tencent.devops.process.trigger.event.GenericWebhookRequestEvent
+import com.tencent.devops.process.trigger.event.GenericWebhookTriggerEvent
 import com.tencent.devops.process.trigger.event.RemoteDevWebhookRequestEvent
+import com.tencent.devops.process.trigger.event.RemoteDevWebhookTriggerEvent
 import com.tencent.devops.process.trigger.event.ScmWebhookRequestEvent
-import com.tencent.devops.process.trigger.market.MarketEventManager
+import com.tencent.devops.process.trigger.market.MarketEventRequestService
+import com.tencent.devops.process.trigger.market.MarketEventTriggerBuildService
 import com.tencent.devops.process.trigger.scm.WebhookManager
 import com.tencent.devops.process.webhook.listener.WebhookEventListener
 import com.tencent.devops.process.webhook.pojo.event.commit.GitWebhookEvent
@@ -111,15 +114,29 @@ class WebhookMQConfiguration @Autowired constructor() {
 
     @EventConsumer
     fun remoteDevWebhookRequestEventConsumer(
-        @Autowired marketEventManager: MarketEventManager
+        @Autowired marketEventRequestService: MarketEventRequestService
     ) = ScsConsumerBuilder.build<RemoteDevWebhookRequestEvent> {
-        marketEventManager.handleRemoteDevWebhookRequestEvent(it)
+        marketEventRequestService.handleRemoteDevWebhookRequestEvent(it)
+    }
+
+    @EventConsumer
+    fun remoteDevWebhookTriggerEventConsumer(
+        @Autowired marketEventTriggerBuildService: MarketEventTriggerBuildService
+    ) = ScsConsumerBuilder.build<RemoteDevWebhookTriggerEvent> {
+        marketEventTriggerBuildService.remoteDevWebhookTrigger(it)
     }
 
     @EventConsumer
     fun genericWebhookRequestEventConsumer(
-        @Autowired marketEventManager: MarketEventManager
+        @Autowired marketEventRequestService: MarketEventRequestService
     ) = ScsConsumerBuilder.build<GenericWebhookRequestEvent> {
-        marketEventManager.handleGenericWebhookRequestEvent(it)
+        marketEventRequestService.handleGenericWebhookRequestEvent(it)
+    }
+
+    @EventConsumer
+    fun genericWebhookTriggerEventConsumer(
+        @Autowired marketEventTriggerBuildService: MarketEventTriggerBuildService
+    ) = ScsConsumerBuilder.build<GenericWebhookTriggerEvent> {
+        marketEventTriggerBuildService.genericWebhookTrigger(it)
     }
 }

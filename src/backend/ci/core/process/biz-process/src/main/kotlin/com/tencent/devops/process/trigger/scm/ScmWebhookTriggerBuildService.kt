@@ -30,20 +30,16 @@ package com.tencent.devops.process.trigger.scm
 import com.tencent.devops.common.api.exception.ErrorCodeException
 import com.tencent.devops.common.api.pojo.I18Variable
 import com.tencent.devops.common.pipeline.container.TriggerContainer
-import com.tencent.devops.common.pipeline.enums.StartType
-import com.tencent.devops.common.pipeline.pojo.BuildParameters
 import com.tencent.devops.common.pipeline.pojo.element.trigger.WebHookTriggerElement
 import com.tencent.devops.common.pipeline.utils.PIPELINE_PAC_REPO_HASH_ID
 import com.tencent.devops.common.webhook.enums.WebhookI18nConstants.TRIGGER_CONDITION_NOT_MATCH
 import com.tencent.devops.process.constant.ProcessMessageCode
-import com.tencent.devops.process.engine.compatibility.BuildParametersCompatibilityTransformer
-import com.tencent.devops.process.engine.pojo.PipelineInfo
 import com.tencent.devops.process.engine.service.PipelineRepositoryService
-import com.tencent.devops.process.pojo.pipeline.PipelineResourceVersion
 import com.tencent.devops.process.pojo.trigger.PipelineTriggerFailedMatchElement
-import com.tencent.devops.process.service.pipeline.PipelineBuildService
 import com.tencent.devops.process.service.pipeline.PipelineYamlVersionResolver
 import com.tencent.devops.process.trigger.PipelineTriggerEventService
+import com.tencent.devops.process.trigger.WebhookTriggerBuildService
+import com.tencent.devops.process.trigger.enums.MatchStatus
 import com.tencent.devops.process.trigger.scm.listener.WebhookTriggerContext
 import com.tencent.devops.process.trigger.scm.listener.WebhookTriggerManager
 import com.tencent.devops.process.utils.PipelineVarUtil
@@ -56,18 +52,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class WebhookTriggerBuildService @Autowired constructor(
+class ScmWebhookTriggerBuildService @Autowired constructor(
     private val pipelineRepositoryService: PipelineRepositoryService,
-    private val pipelineBuildService: PipelineBuildService,
     private val webhookTriggerManager: WebhookTriggerManager,
     private val webhookTriggerMatcher: WebhookTriggerMatcher,
-    private val buildParamCompatibilityTransformer: BuildParametersCompatibilityTransformer,
     private val pipelineTriggerEventService: PipelineTriggerEventService,
-    private val pipelineYamlVersionResolver: PipelineYamlVersionResolver
+    private val pipelineYamlVersionResolver: PipelineYamlVersionResolver,
+    private val webhookTriggerBuildService: WebhookTriggerBuildService
 ) {
 
     companion object {
-        private val logger = LoggerFactory.getLogger(WebhookTriggerBuildService::class.java)
+        private val logger = LoggerFactory.getLogger(ScmWebhookTriggerBuildService::class.java)
     }
 
     fun trigger(
@@ -137,7 +132,7 @@ class WebhookTriggerBuildService @Autowired constructor(
                     }
 
                     MatchStatus.SUCCESS -> {
-                        startPipeline(
+                        webhookTriggerBuildService.startPipeline(
                             context = context,
                             pipelineInfo = pipelineInfo,
                             resource = resource,
@@ -207,75 +202,5 @@ class WebhookTriggerBuildService @Autowired constructor(
                 webhook = webhook
             )
         }
-    }
-
-    private fun startPipeline(
-        context: WebhookTriggerContext,
-        pipelineInfo: PipelineInfo,
-        resource: PipelineResourceVersion,
-        startParams: Map<String, Any>
-    ) {
-        val startEpoch = System.currentTimeMillis()
-        val (projectId, pipelineId) = pipelineInfo.projectId to pipelineInfo.pipelineId
-        val userId = pipelineRepositoryService.getPipelineOauthUser(
-            projectId = projectId,
-            pipelineId = pipelineId
-        ) ?: pipelineInfo.lastModifyUser
-        val buildId = pipelineBuildService.startPipeline(
-            userId = userId,
-            pipeline = pipelineInfo,
-            startType = StartType.WEB_HOOK,
-            pipelineParamMap = convertBuildParameters(
-                userId = userId,
-                projectId = projectId,
-                pipelineId = pipelineId,
-                triggerContainer = resource.model.getTriggerContainer(),
-                startParams = startParams
-            ),
-            channelCode = pipelineInfo.channelCode,
-            isMobile = false,
-            resource = resource,
-            signPipelineVersion = resource.version,
-            frequencyLimit = false
-        )
-        logger.info(
-            "success to trigger by webhook|eventId:${context.eventId}|" +
-                "projectId: $projectId|pipelineId: $pipelineId|version: ${resource.version}"
-        )
-        context.buildId = buildId
-        context.startParams = startParams
-        webhookTriggerManager.fireBuildSuccess(context = context)
-        logger.info("$pipelineId|WEBHOOK_TRIGGER|time=${System.currentTimeMillis() - startEpoch}")
-    }
-
-    private fun convertBuildParameters(
-        userId: String,
-        projectId: String,
-        pipelineId: String,
-        triggerContainer: TriggerContainer,
-        startParams: Map<String, Any>
-    ): MutableMap<String, BuildParameters> {
-        val pipelineParamMap = mutableMapOf<String, BuildParameters>()
-        val paramMap = buildParamCompatibilityTransformer.parseTriggerParam(
-            userId = userId,
-            projectId = projectId,
-            pipelineId = pipelineId,
-            paramProperties = triggerContainer.params,
-            paramValues = startParams.mapValues { it.value.toString() }
-        )
-        pipelineParamMap.putAll(paramMap)
-        startParams.forEach {
-            if (paramMap.containsKey(it.key)) {
-                return@forEach
-            }
-            // 从旧转新: 兼容从旧入口写入的数据转到新的流水线运行
-            val newVarName = PipelineVarUtil.oldVarToNewVar(it.key)
-            if (newVarName == null) { // 为空表示该变量是新的，或者不需要兼容，直接加入，能会覆盖旧变量转换而来的新变量
-                pipelineParamMap[it.key] = BuildParameters(key = it.key, value = it.value ?: "")
-            } else if (!pipelineParamMap.contains(newVarName)) { // 新变量还不存在，加入
-                pipelineParamMap[newVarName] = BuildParameters(key = newVarName, value = it.value ?: "")
-            }
-        }
-        return pipelineParamMap
     }
 }

@@ -38,7 +38,7 @@ import com.tencent.devops.common.webhook.pojo.WebhookRequest
 import com.tencent.devops.common.webhook.pojo.code.github.GithubCheckRunEvent
 import com.tencent.devops.process.api.service.ServiceBuildResource
 import com.tencent.devops.process.dao.PipelineTriggerEventDao
-import com.tencent.devops.process.trigger.WebhookTriggerService
+import com.tencent.devops.process.trigger.WebhookTriggerBuildService
 import com.tencent.devops.process.trigger.event.ScmWebhookRequestEvent
 import com.tencent.devops.process.trigger.scm.WebhookGrayCompareService
 import com.tencent.devops.process.trigger.scm.WebhookGrayService
@@ -59,7 +59,7 @@ import java.time.LocalDateTime
 class WebhookRequestService(
     private val client: Client,
     private val webhookEventFactory: WebhookEventFactory,
-    private val webhookTriggerService: WebhookTriggerService,
+    private val webhookTriggerBuildService: WebhookTriggerBuildService,
     private val dslContext: DSLContext,
     private val pipelineTriggerEventDao: PipelineTriggerEventDao,
     private val pipelineYamlFacadeService: PipelineYamlFacadeService,
@@ -134,7 +134,7 @@ class WebhookRequestService(
         if (grayRepo) {
             handleGrayRequest(scmType.name, repoName, request)
         } else {
-            webhookTriggerService.trigger(
+            webhookTriggerBuildService.trigger(
                 scmType = scmType,
                 matcher = matcher,
                 requestId = requestId,
@@ -215,7 +215,7 @@ class WebhookRequestService(
                 }
                 val matcher = webhookEventFactory.createScmWebHookMatcher(scmType = scmType, event = event)
 
-                webhookTriggerService.replay(
+                webhookTriggerBuildService.replay(
                     replayEvent = replayEvent,
                     triggerEvent = triggerEvent,
                     matcher = matcher

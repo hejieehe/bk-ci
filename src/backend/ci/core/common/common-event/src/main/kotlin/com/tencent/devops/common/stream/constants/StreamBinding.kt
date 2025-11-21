@@ -162,7 +162,10 @@ object StreamBinding {
     // scm webhook请求回调
     const val SCM_HOOK_BUILD_REQUEST_EVENT = "engine.pipeline.hook.scm.event"
 
-    const val REMOTEDEV_WEBHOOK_REQUEST_EVENT = "engine.pipeline.remotedev.webhook.event"
+    const val REMOTEDEV_WEBHOOK_REQUEST_EVENT = "engine.pipeline.remotedev.webhook.request.event"
+
+    const val REMOTEDEV_WEBHOOK_TRIGGER_EVENT = "engine.pipeline.remotedev.webhook.trigger.event"
+
 
     const val GENERIC_WEBHOOK_REQUEST_EVENT = "engine.pipeline.generic.webhook.event"
 

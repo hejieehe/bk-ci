@@ -44,7 +44,7 @@ import org.springframework.stereotype.Service
 class PipelineWebHookEventListener @Autowired constructor(
     private val pipelineWebhookService: PipelineWebhookService,
     private val pipelineYamlService: PipelineYamlService,
-    private val webhookTriggerBuildService: WebhookTriggerBuildService,
+    private val scmWebhookTriggerBuildService: ScmWebhookTriggerBuildService,
     private val webhookGrayService: WebhookGrayService
 ) : WebHookEventListener {
 
@@ -84,7 +84,7 @@ class PipelineWebHookEventListener @Autowired constructor(
                     return@forEach
                 }
             }
-            webhookTriggerBuildService.trigger(
+            scmWebhookTriggerBuildService.trigger(
                 projectId = projectId,
                 pipelineId = pipelineId,
                 version = version,

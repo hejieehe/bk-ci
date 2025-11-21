@@ -32,17 +32,17 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
 @Schema(title = "流水线触发事件")
-data class PipelineTriggerEvent(
+data class PipelineTriggerEventWithoutBody(
     @get:Schema(title = "请求ID")
     val requestId: String,
     @get:Schema(title = "项目ID")
-    var projectId: String? = null,
+    var projectId: String,
     @get:Schema(title = "事件ID")
-    var eventId: Long? = null,
+    var eventId: Long,
     @get:Schema(title = "触发类型")
     val triggerType: String,
     @get:Schema(title = "事件源", required = false)
-    var eventSource: String? = null,
+    var eventSource: String,
     @get:Schema(title = "事件类型")
     val eventType: String,
     @get:Schema(title = "触发人")
@@ -54,7 +54,5 @@ data class PipelineTriggerEvent(
     @get:Schema(title = "事件请求参数, 记录手动/openapi/定时/远程触发启动参数")
     val requestParams: Map<String, String>? = null,
     @get:Schema(title = "触发时间")
-    val createTime: LocalDateTime,
-    @get:Schema(title = "事件体")
-    val eventBody: String? = null
+    val createTime: LocalDateTime
 )
