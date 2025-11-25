@@ -131,4 +131,12 @@ interface StoreComponentQueryService {
         osName: String? = null,
         osArch: String? = null
     ): VersionInfo?
+
+    /**
+     * 获取满足条件的组件数量
+     */
+    fun getComponentCount(
+        userId: String,
+        queryComponentsParam: QueryComponentsParam
+    ): Int
 }
