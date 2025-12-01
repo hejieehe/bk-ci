@@ -129,7 +129,7 @@ class WebhookManager @Autowired constructor(
                         eventDesc = eventDesc,
                         requestId = requestId,
                         createTime = LocalDateTime.now(),
-                        eventBody = webhook
+                        eventBody = JsonUtil.toJson(webhook, false)
                     )
                     pipelineTriggerEventService.saveTriggerEvent(triggerEvent = triggerEvent)
                 } else {
@@ -147,7 +147,7 @@ class WebhookManager @Autowired constructor(
                         eventDesc = eventDesc,
                         requestId = requestId,
                         createTime = event?.createTime ?: LocalDateTime.now(),
-                        eventBody = webhook
+                        eventBody = JsonUtil.toJson(webhook, false)
                     )
                     pipelineTriggerEventService.updateTriggerEvent(triggerEvent = triggerEvent)
                 }

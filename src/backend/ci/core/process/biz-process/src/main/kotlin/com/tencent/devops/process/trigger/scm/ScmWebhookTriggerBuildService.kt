@@ -29,6 +29,7 @@ package com.tencent.devops.process.trigger.scm
 
 import com.tencent.devops.common.api.exception.ErrorCodeException
 import com.tencent.devops.common.api.pojo.I18Variable
+import com.tencent.devops.common.api.util.JsonUtil
 import com.tencent.devops.common.pipeline.container.TriggerContainer
 import com.tencent.devops.common.pipeline.pojo.element.trigger.WebHookTriggerElement
 import com.tencent.devops.common.pipeline.utils.PIPELINE_PAC_REPO_HASH_ID
@@ -199,7 +200,7 @@ class ScmWebhookTriggerBuildService @Autowired constructor(
                 version = pipelineYamlVersion.version,
                 eventId = eventId,
                 repository = repository,
-                webhook = webhook
+                webhook = JsonUtil.to(webhook, Webhook::class.java)
             )
         }
     }
