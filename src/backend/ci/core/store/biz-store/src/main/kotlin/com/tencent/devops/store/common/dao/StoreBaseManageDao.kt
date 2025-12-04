@@ -66,7 +66,8 @@ class StoreBaseManageDao {
                 CREATOR,
                 MODIFIER,
                 UPDATE_TIME,
-                CREATE_TIME
+                CREATE_TIME,
+                OWNER_STORE_CODE
             ).values(
                 storeBaseDataPO.id,
                 storeBaseDataPO.storeCode,
@@ -86,7 +87,8 @@ class StoreBaseManageDao {
                 storeBaseDataPO.creator,
                 storeBaseDataPO.modifier,
                 storeBaseDataPO.updateTime,
-                storeBaseDataPO.createTime
+                storeBaseDataPO.createTime,
+                storeBaseDataPO.ownerStoreCode
             )
                 .onDuplicateKeyUpdate()
                 .set(NAME, storeBaseDataPO.name)
