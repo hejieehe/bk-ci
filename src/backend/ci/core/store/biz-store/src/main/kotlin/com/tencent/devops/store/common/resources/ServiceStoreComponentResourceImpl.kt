@@ -179,15 +179,13 @@ class ServiceStoreComponentResourceImpl @Autowired constructor(
         )
     }
 
-    override fun getComponentDetailInfoByCode(
-        userId: String,
+    override fun getComponentDataInfoByCode(
         storeType: StoreTypeEnum,
         storeCode: String,
         version: String?
     ): Result<StoreDetailInfo?> {
         return Result(
-            storeComponentQueryService.getComponentDetailInfoByCode(
-                userId = userId,
+            storeComponentQueryService.getComponentDataInfoByCode(
                 storeType = storeType.name,
                 storeCode = storeCode,
                 version = version

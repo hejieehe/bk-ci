@@ -58,6 +58,7 @@ import com.tencent.devops.process.engine.dao.PipelineInfoDao
 import com.tencent.devops.process.engine.dao.PipelineModelTaskDao
 import com.tencent.devops.process.engine.service.PipelineRepositoryService
 import com.tencent.devops.process.pojo.PipelineAtomRel
+import com.tencent.devops.process.pojo.PipelineAtomRelCount
 import com.tencent.devops.process.strategy.context.UserPipelinePermissionCheckContext
 import com.tencent.devops.process.strategy.factory.UserPipelinePermissionCheckStrategyFactory
 import com.tencent.devops.process.utils.KEY_PIPELINE_ID
@@ -422,5 +423,30 @@ class PipelineAtomService @Autowired constructor(
         // 获取流水线下插件标识集合
         val atomCodes = ModelUtils.getModelAtoms(model)
         return client.get(ServiceAtomResource::class).getAtomProps(atomCodes)
+    }
+
+    fun getAtomRelCount(
+        storeCode: String,
+        projectId: String?
+    ): Result<PipelineAtomRelCount> {
+        val pipelineRefCount = pipelineModelTaskDao.countByAtomCode(
+            dslContext = dslContext,
+            atomCode = storeCode,
+            projectId = projectId
+        )
+        val projectRefCount = if (projectId.isNullOrBlank()) {
+            pipelineModelTaskDao.getProjectCountByAtomCode(
+                dslContext = dslContext,
+                atomCode = storeCode
+            )
+        } else {
+            if (pipelineRefCount > 1) 1 else 0
+        }
+        return Result(
+            PipelineAtomRelCount(
+                pipelineCount = pipelineRefCount,
+                projectCount = projectRefCount
+            )
+        )
     }
 }
