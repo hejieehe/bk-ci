@@ -132,6 +132,7 @@ allprojects {
                 entry("devops-scm-api")
                 entry("devops-scm-spring-boot-starter")
             }
+            dependency("com.jayway.jsonpath:json-path:${Versions.jsonPath}")
         }
     }
 
