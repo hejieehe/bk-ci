@@ -16,7 +16,7 @@ data class PipelineEventSubscription(
     @get:Schema(title = "事件源")
     val eventSource: String,
     @get:Schema(title = "事件类型")
-    val eventType: String,
+    val eventType: String?,
     @get:Schema(title = "流水线创建渠道")
     val channelCode: ChannelCode
 )

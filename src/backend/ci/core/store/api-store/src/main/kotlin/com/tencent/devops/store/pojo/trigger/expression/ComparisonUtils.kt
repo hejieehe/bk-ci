@@ -20,14 +20,6 @@ object ComparisonUtils {
         }
     }
 
-    fun compareForEquality(eventValue: Any?, inputValue: Any?): Boolean {
-        return when {
-            eventValue == null && inputValue == null -> true
-            eventValue == null || inputValue == null -> false
-            else -> compare(eventValue, inputValue) == 0
-        }
-    }
-
     /**
      * 数字比较的内部实现
      */

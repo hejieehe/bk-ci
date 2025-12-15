@@ -89,7 +89,7 @@ class TriggerContainerVersionPostProcessor @Autowired constructor(
                     taskId = element.id!!,
                     eventCode = element.atomCode,
                     eventSource = "",
-                    eventType = "",
+                    eventType = null,
                     channelCode = channelCode
                 )
             }
