@@ -51,6 +51,14 @@ object WebhookI18nConstants {
     const val TGIT_TAG_PUSH_EVENT_DESC = "bkTgitTagPushEventDesc"
     const val TGIT_TAG_DELETE_EVENT_DESC = "bkTgitTagDeleteEventDesc"
 
+    // 工蜂项目操作事件描述
+    const val TGIT_PROJECT_CREATE_EVENT_DESC = "bkTgitProjectCreateEventDesc"
+    const val TGIT_PROJECT_DELETE_EVENT_DESC = "bkTgitProjectDeleteEventDesc"
+    const val TGIT_PROJECT_REFERENCE_EVENT_DESC = "bkTgitProjectReferenceEventDesc"
+    const val TGIT_PROJECT_DEREFERENCE_EVENT_DESC = "bkTgitProjectDereferenceEventDesc"
+    const val TGIT_PROJECT_TRANSFER_IN_EVENT_DESC = "bkTgitProjectTransferInEventDesc"
+    const val TGIT_PROJECT_TRANSFER_OUT_EVENT_DESC = "bkTgitProjectTransferOutEventDesc"
+
     // Github事件描述
     const val GITHUB_PUSH_EVENT_DESC = "bkGithubPushEventDesc"
     const val GITHUB_CREATE_TAG_EVENT_DESC = "bkGithubCreateTagEventDesc"
@@ -158,4 +166,13 @@ object WebhookI18nConstants {
 
     // 代码库开启PAC事件描述
     const val ENABLE_PAC_EVENT_DESC = "bkRepoEnablePacEventDesc"
+
+    // 项目组操作类型不匹配
+    const val GROUP_ACTION_NOT_MATCH = "bkRepoTriggerGroupActionNotMatch"
+
+    // 仓库名称不匹配
+    const val REPO_NAME_NOT_MATCH = "bkRepoTriggerRepoNameNotMatch"
+
+    // 仓库名称被忽略
+    const val REPO_NAME_NOT_IGNORED = "bkRepoTriggerRepoNameNotIgnored"
 }

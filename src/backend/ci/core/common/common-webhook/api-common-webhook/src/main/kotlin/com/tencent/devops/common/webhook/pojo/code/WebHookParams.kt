@@ -77,5 +77,11 @@ data class WebHookParams(
     // 跳过WIP
     var skipWip: Boolean? = false,
     // 触发代码库的链接地址[SVN触发时需关注{关联代码库地址}和{触发器配置的相对路径}]
-    var sourceRepoUrl: String? = ""
+    var sourceRepoUrl: String? = "",
+    // 监听的代码库名称
+    var includeRepoNames: String? = "",
+    // 忽略的代码库名称
+    var excludeRepoNames: String? = "",
+    // 监听的代码库组action
+    var includeRepoGroupAction: String? = null
 )
