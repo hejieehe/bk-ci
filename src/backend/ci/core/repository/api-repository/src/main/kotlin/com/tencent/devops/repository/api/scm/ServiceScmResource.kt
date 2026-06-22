@@ -27,8 +27,11 @@
 
 package com.tencent.devops.repository.api.scm
 
+import com.tencent.devops.common.api.enums.RepositoryConfig
+import com.tencent.devops.common.api.enums.RepositoryType
 import com.tencent.devops.common.api.enums.ScmType
 import com.tencent.devops.common.api.pojo.Result
+import com.tencent.devops.repository.pojo.Repository
 import com.tencent.devops.scm.enums.CodeSvnRegion
 import com.tencent.devops.scm.pojo.CommitCheckRequest
 import com.tencent.devops.scm.pojo.GitCommit
@@ -49,6 +52,7 @@ import jakarta.ws.rs.Consumes
 import jakarta.ws.rs.GET
 import jakarta.ws.rs.POST
 import jakarta.ws.rs.Path
+import jakarta.ws.rs.PathParam
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.QueryParam
 import jakarta.ws.rs.core.MediaType
@@ -158,6 +162,101 @@ interface ServiceScmResource {
         @QueryParam("search")
         search: String? = null
     ): Result<List<String>>
+
+    @Operation(summary = "通过代码库HashId/Name查询分支列表(自动按代码库类型与授权方式分发)")
+    @GET
+    @Path("/projects/{projectId}/branchesByRepo")
+    fun listBranchesByRepo(
+        @Parameter(description = "项目ID", required = true)
+        @PathParam("projectId")
+        projectId: String,
+        @Parameter(description = "代码库类型,ID或Name", required = false)
+        @QueryParam("repositoryType")
+        repositoryType: RepositoryType?,
+        @Parameter(description = "代码库ID或名称", required = true)
+        @QueryParam("repoHashIdOrName")
+        repoHashIdOrName: String,
+        @Parameter(description = "搜索条件", required = false)
+        @QueryParam("search")
+        search: String? = null,
+        @Parameter(description = "页码", required = false)
+        @QueryParam("page")
+        page: Int = 1,
+        @Parameter(description = "每页数量", required = false)
+        @QueryParam("pageSize")
+        pageSize: Int = 20
+    ): Result<List<String>>
+
+    @Operation(summary = "通过代码库HashId/Name查询Tag列表(自动按代码库类型与授权方式分发)")
+    @GET
+    @Path("/projects/{projectId}/tagsByRepo")
+    fun listTagsByRepo(
+        @Parameter(description = "项目ID", required = true)
+        @PathParam("projectId")
+        projectId: String,
+        @Parameter(description = "代码库类型,ID或Name", required = false)
+        @QueryParam("repositoryType")
+        repositoryType: RepositoryType?,
+        @Parameter(description = "代码库ID或名称", required = true)
+        @QueryParam("repoHashIdOrName")
+        repoHashIdOrName: String,
+        @Parameter(description = "搜索条件", required = false)
+        @QueryParam("search")
+        search: String? = null,
+        @Parameter(description = "页码", required = false)
+        @QueryParam("page")
+        page: Int = 1,
+        @Parameter(description = "每页数量", required = false)
+        @QueryParam("pageSize")
+        pageSize: Int = 20
+    ): Result<List<String>>
+
+    @Operation(summary = "通过 RepositoryConfig 查询仓库最新 revision(自动按代码库类型与授权方式分发)")
+    @POST
+    @Path("/projects/{projectId}/latestRevisionByRepo")
+    fun getLatestRevisionByRepo(
+        @Parameter(description = "项目ID", required = true)
+        @PathParam("projectId")
+        projectId: String,
+        @Parameter(description = "分支名称", required = false)
+        @QueryParam("branchName")
+        branchName: String? = null,
+        @Parameter(description = "SVN additional path", required = false)
+        @QueryParam("additionalPath")
+        additionalPath: String? = null,
+        @Parameter(description = "RepositoryConfig", required = true)
+        repositoryConfig: RepositoryConfig
+    ): Result<RevisionInfo>
+
+    @Operation(summary = "通过 RepositoryConfig 查询仓库默认分支(自动按代码库类型与授权方式分发)")
+    @POST
+    @Path("/projects/{projectId}/defaultBranchByRepo")
+    fun getDefaultBranchByRepo(
+        @Parameter(description = "项目ID", required = true)
+        @PathParam("projectId")
+        projectId: String,
+        @Parameter(description = "RepositoryConfig", required = true)
+        repositoryConfig: RepositoryConfig
+    ): Result<String?>
+
+    @Operation(
+        summary = "添加仓库 Webhook(按 scmType 自动分发到 Git/Gitlab/SVN/TGit/P4/Scm 等具体实现)"
+    )
+    @POST
+    @Path("/projects/{projectId}/webhookByRepo")
+    fun addWebhookByRepo(
+        @Parameter(description = "项目ID", required = true)
+        @PathParam("projectId")
+        projectId: String,
+        @Parameter(description = "代码库类型", required = true)
+        @QueryParam("scmType")
+        scmType: ScmType,
+        @Parameter(description = "事件类型,可空(P4 用 codeEventType.name 作为 event)", required = false)
+        @QueryParam("codeEventType")
+        codeEventType: String?,
+        @Parameter(description = "RepositoryConfig", required = true)
+        repositoryConfig: RepositoryConfig
+    ): Result<Repository>
 
     @Operation(summary = "Check if the svn private key and passphrase legal")
     @GET

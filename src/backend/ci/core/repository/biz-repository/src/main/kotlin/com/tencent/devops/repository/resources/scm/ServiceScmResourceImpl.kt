@@ -27,12 +27,17 @@
 
 package com.tencent.devops.repository.resources.scm
 
+import com.tencent.devops.common.api.enums.RepositoryConfig
+import com.tencent.devops.common.api.enums.RepositoryType
 import com.tencent.devops.common.api.enums.ScmType
 import com.tencent.devops.common.api.pojo.Result
 import com.tencent.devops.common.api.util.JsonUtil
+import com.tencent.devops.common.pipeline.pojo.element.trigger.enums.CodeEventType
 import com.tencent.devops.common.web.RestResource
 import com.tencent.devops.repository.api.scm.ServiceScmResource
+import com.tencent.devops.repository.pojo.Repository
 import com.tencent.devops.repository.service.scm.IScmService
+import com.tencent.devops.repository.service.scm.ScmRepositorySupportService
 import com.tencent.devops.scm.enums.CodeSvnRegion
 import com.tencent.devops.scm.pojo.CommitCheckRequest
 import com.tencent.devops.scm.pojo.GitCommit
@@ -51,8 +56,10 @@ import org.springframework.beans.factory.annotation.Autowired
 
 @Suppress("ALL")
 @RestResource
-class ServiceScmResourceImpl @Autowired constructor(private val scmService: IScmService) :
-    ServiceScmResource {
+class ServiceScmResourceImpl @Autowired constructor(
+    private val scmService: IScmService,
+    private val scmRepositorySupportService: ScmRepositorySupportService
+) : ServiceScmResource {
     override fun getLatestRevision(
         projectName: String,
         url: String,
@@ -133,6 +140,126 @@ class ServiceScmResourceImpl @Autowired constructor(private val scmService: IScm
                 search = search
             )
         )
+    }
+
+    override fun listBranchesByRepo(
+        projectId: String,
+        repositoryType: RepositoryType?,
+        repoHashIdOrName: String,
+        search: String?,
+        page: Int,
+        pageSize: Int
+    ): Result<List<String>> {
+        logger.info(
+            "listBranchesByRepo|$projectId|$repositoryType|$repoHashIdOrName|$search|$page|$pageSize"
+        )
+        return scmRepositorySupportService.listBranches(
+            projectId = projectId,
+            repositoryType = repositoryType,
+            repoHashIdOrName = repoHashIdOrName,
+            search = search,
+            page = page,
+            pageSize = pageSize
+        )
+    }
+
+    override fun listTagsByRepo(
+        projectId: String,
+        repositoryType: RepositoryType?,
+        repoHashIdOrName: String,
+        search: String?,
+        page: Int,
+        pageSize: Int
+    ): Result<List<String>> {
+        logger.info(
+            "listTagsByRepo|$projectId|$repositoryType|$repoHashIdOrName|$search|$page|$pageSize"
+        )
+        return scmRepositorySupportService.listTags(
+            projectId = projectId,
+            repositoryType = repositoryType,
+            repoHashIdOrName = repoHashIdOrName,
+            search = search,
+            page = page,
+            pageSize = pageSize
+        )
+    }
+
+    override fun getLatestRevisionByRepo(
+        projectId: String,
+        branchName: String?,
+        additionalPath: String?,
+        repositoryConfig: RepositoryConfig
+    ): Result<RevisionInfo> {
+        logger.info(
+            "getLatestRevisionByRepo|$projectId|$branchName|$additionalPath|$repositoryConfig"
+        )
+        return scmRepositorySupportService.getLatestRevision(
+            projectId = projectId,
+            repositoryConfig = repositoryConfig,
+            branchName = branchName,
+            additionalPath = additionalPath,
+            variables = null
+        )
+    }
+
+    override fun getDefaultBranchByRepo(
+        projectId: String,
+        repositoryConfig: RepositoryConfig
+    ): Result<String?> {
+        logger.info("getDefaultBranchByRepo|$projectId|$repositoryConfig")
+        return Result(
+            scmRepositorySupportService.getDefaultBranch(
+                projectId = projectId,
+                repositoryConfig = repositoryConfig
+            )
+        )
+    }
+
+    override fun addWebhookByRepo(
+        projectId: String,
+        scmType: ScmType,
+        codeEventType: String?,
+        repositoryConfig: RepositoryConfig
+    ): Result<Repository> {
+        logger.info("addWebhookByRepo|$projectId|$scmType|$codeEventType|$repositoryConfig")
+        val finalCodeEventType = CodeEventType.convert(codeEventType) ?: throw IllegalArgumentException(
+            "Unsupported codeEventType=[$codeEventType] for addWebhookByRepo"
+        )
+        val repo: Repository = when (scmType) {
+            ScmType.CODE_GIT -> scmRepositorySupportService.addGitWebhook(
+                projectId = projectId,
+                repositoryConfig = repositoryConfig,
+                codeEventType = finalCodeEventType
+            )
+            ScmType.CODE_GITLAB -> scmRepositorySupportService.addGitlabWebhook(
+                projectId = projectId,
+                repositoryConfig = repositoryConfig,
+                codeEventType = finalCodeEventType
+            )
+            ScmType.CODE_SVN -> scmRepositorySupportService.addSvnWebhook(
+                projectId = projectId,
+                repositoryConfig = repositoryConfig
+            )
+            ScmType.CODE_TGIT -> scmRepositorySupportService.addTGitWebhook(
+                projectId = projectId,
+                repositoryConfig = repositoryConfig,
+                codeEventType = finalCodeEventType
+            )
+            ScmType.CODE_P4 -> scmRepositorySupportService.addP4Webhook(
+                projectId = projectId,
+                repositoryConfig = repositoryConfig,
+                codeEventType = finalCodeEventType
+            )
+            ScmType.SCM_GIT, ScmType.SCM_SVN -> scmRepositorySupportService.addScmWebhook(
+                projectId = projectId,
+                repositoryConfig = repositoryConfig,
+                codeEventType = finalCodeEventType
+            )
+            else -> throw IllegalArgumentException(
+                "Unsupported scmType=[$scmType] for addWebhookByRepo"
+            )
+        }
+        return Result(repo)
     }
 
     override fun checkPrivateKeyAndToken(

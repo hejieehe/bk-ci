@@ -26,6 +26,7 @@
  */
 package com.tencent.devops.openapi.resources.apigw.v3
 
+import com.tencent.devops.common.api.enums.RepositoryType
 import com.tencent.devops.common.api.enums.ScmType
 import com.tencent.devops.common.api.pojo.Page
 import com.tencent.devops.common.api.pojo.Result
@@ -34,6 +35,7 @@ import com.tencent.devops.common.service.prometheus.BkTimed
 import com.tencent.devops.common.web.RestResource
 import com.tencent.devops.openapi.api.apigw.v3.ApigwRepositoryResourceV3
 import com.tencent.devops.repository.api.ServiceRepositoryResource
+import com.tencent.devops.repository.api.scm.ServiceScmResource
 import com.tencent.devops.repository.pojo.Repository
 import com.tencent.devops.repository.pojo.RepositoryId
 import com.tencent.devops.repository.pojo.RepositoryInfo
@@ -115,6 +117,56 @@ class ApigwRepositoryResourceV3Impl @Autowired constructor(private val client: C
             projectId = projectId,
             repositoryHashId = repositoryHashId,
             repository = repository
+        )
+    }
+
+    override fun listBranches(
+        appCode: String?,
+        apigwType: String?,
+        userId: String,
+        projectId: String,
+        repositoryType: RepositoryType?,
+        repoHashIdOrName: String,
+        search: String?,
+        page: Int?,
+        pageSize: Int?
+    ): Result<List<String>> {
+        logger.info(
+            "OPENAPI_REPOSITORY_V4|$userId|list branches|$projectId|$repositoryType|$repoHashIdOrName|" +
+                    "$search|$page|$pageSize"
+        )
+        return client.get(ServiceScmResource::class).listBranchesByRepo(
+            projectId = projectId,
+            repositoryType = repositoryType,
+            repoHashIdOrName = repoHashIdOrName,
+            search = search,
+            page = page ?: 1,
+            pageSize = pageSize ?: 20
+        )
+    }
+
+    override fun listTags(
+        appCode: String?,
+        apigwType: String?,
+        userId: String,
+        projectId: String,
+        repositoryType: RepositoryType?,
+        repoHashIdOrName: String,
+        search: String?,
+        page: Int,
+        pageSize: Int
+    ): Result<List<String>> {
+        logger.info(
+            "OPENAPI_REPOSITORY_V3|$userId|list tags|$projectId|$repositoryType|$repoHashIdOrName|" +
+                    "$search|$page|$pageSize"
+        )
+        return client.get(ServiceScmResource::class).listTagsByRepo(
+            projectId = projectId,
+            repositoryType = repositoryType,
+            repoHashIdOrName = repoHashIdOrName,
+            search = search,
+            page = page,
+            pageSize = pageSize
         )
     }
 

@@ -290,4 +290,70 @@ interface ApigwRepositoryResourceV4 {
         @PathParam("repositoryHashId")
         repositoryHashId: String
     ): Result<Boolean>
+
+    @Operation(summary = "查询代码库分支列表", tags = ["v4_app_repository_list_branches", "v4_user_repository_list_branches"])
+    @GET
+    @Path("/branches")
+    fun listBranches(
+        @Parameter(description = "appCode", required = true, example = AUTH_HEADER_DEVOPS_APP_CODE_DEFAULT_VALUE)
+        @HeaderParam(AUTH_HEADER_DEVOPS_APP_CODE)
+        appCode: String?,
+        @Parameter(description = "apigw Type", required = true)
+        @PathParam("apigwType")
+        apigwType: String?,
+        @Parameter(description = "用户ID", required = true, example = AUTH_HEADER_DEVOPS_USER_ID_DEFAULT_VALUE)
+        @HeaderParam(AUTH_HEADER_DEVOPS_USER_ID)
+        userId: String,
+        @Parameter(description = "项目ID(项目英文名)", required = true)
+        @PathParam("projectId")
+        projectId: String,
+        @Parameter(description = "代码库类型,ID或Name", required = false)
+        @QueryParam("repositoryType")
+        repositoryType: RepositoryType?,
+        @Parameter(description = "代码库ID或名称", required = true)
+        @QueryParam("repoHashIdOrName")
+        repoHashIdOrName: String,
+        @Parameter(description = "搜索条件", required = false)
+        @QueryParam("search")
+        search: String? = null,
+        @Parameter(description = "页码", required = false, example = "1")
+        @QueryParam("page")
+        page: Int?,
+        @Parameter(description = "每页数量", required = false, example = "20")
+        @QueryParam("pageSize")
+        pageSize: Int?
+    ): Result<List<String>>
+
+    @Operation(summary = "查询代码库Tag列表", tags = ["v4_app_repository_list_tags", "v4_user_repository_list_tags"])
+    @GET
+    @Path("/tags")
+    fun listTags(
+        @Parameter(description = "appCode", required = true, example = AUTH_HEADER_DEVOPS_APP_CODE_DEFAULT_VALUE)
+        @HeaderParam(AUTH_HEADER_DEVOPS_APP_CODE)
+        appCode: String?,
+        @Parameter(description = "apigw Type", required = true)
+        @PathParam("apigwType")
+        apigwType: String?,
+        @Parameter(description = "用户ID", required = true, example = AUTH_HEADER_DEVOPS_USER_ID_DEFAULT_VALUE)
+        @HeaderParam(AUTH_HEADER_DEVOPS_USER_ID)
+        userId: String,
+        @Parameter(description = "项目ID(项目英文名)", required = true)
+        @PathParam("projectId")
+        projectId: String,
+        @Parameter(description = "代码库类型,ID或Name", required = false)
+        @QueryParam("repositoryType")
+        repositoryType: RepositoryType?,
+        @Parameter(description = "代码库ID或名称", required = true)
+        @QueryParam("repoHashIdOrName")
+        repoHashIdOrName: String,
+        @Parameter(description = "搜索条件", required = false)
+        @QueryParam("search")
+        search: String? = null,
+        @Parameter(description = "页码", required = false)
+        @QueryParam("page")
+        page: Int = 1,
+        @Parameter(description = "每页数量", required = false)
+        @QueryParam("pageSize")
+        pageSize: Int = 20
+    ): Result<List<String>>
 }
